@@ -1,0 +1,69 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Crimes in London</title>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+	<style>
+		html, body {
+			height: 100%;
+			margin: 0;
+            font-family:'Trebuchet MS';
+            text-align: center
+		}
+        a{
+            color:cadetblue;
+            text-decoration: none
+        }
+		#map {
+			width: 100%;
+			height: 80%;
+		}
+	</style>
+</head>
+<body>
+<h1>Police API + Leaflet  JavaScript Library</h1>   
+<p>Returns the crimes which occurred at the specified location in January 2019<br>
+url: <a href="https://data.police.uk/api/crimes-street/all-crime?lat=51.5074&lng=0.1278">data.police.uk</a></p> 
+<div id='map'></div>
+<script>
+	var crimes = L.layerGroup();
+    const request = new XMLHttpRequest();
+    request.open('GET', 'https://data.police.uk/api/crimes-street/all-crime?lat=51.5074&lng=0.1278&date=2019-01');
+    request.send(); 
+  
+    request.onload = () => {
+        if (request.status === 200) {
+            console.log("Success"); // So extract data from json and create table
+            var crime = JSON.parse(request.response);
+            console.log(crime);
+            cLen = crime.length;
+            for (i = 0; i < cLen; i++) L.marker([crime[i].location.latitude, crime[i].location.longitude]).bindPopup('Name: ' + crime[i].location.street.name + '<br>Category: ' + crime[i].category).addTo(crimes);
+        } 
+    };
+    request.onerror = () => {
+        console.log("error")
+    };
+	var mbAttr = '',
+		mbUrl = 'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+	var grayscale   = L.tileLayer(mbUrl, {id: 'mapbox.light', attribution: mbAttr}),
+		streets  = L.tileLayer(mbUrl, {id: 'mapbox.streets',   attribution: mbAttr});
+	var map = L.map('map', {
+		center: [51.5074, 0.1278],
+		zoom: 14,
+		layers: [streets, crimes]
+	});
+	var baseLayers = {
+        "Streets": streets,
+		"Grayscale": grayscale
+	};
+	var overlays = {
+		"Cities": crimes
+	};
+	L.control.layers(baseLayers, overlays).addTo(map);
+</script>
+</body>
+</html>
