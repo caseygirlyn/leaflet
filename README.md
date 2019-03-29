@@ -1,1 +1,1 @@
-View the [Demo](http://girlyn.com/map.htm).
+View [Demo](http://girlyn.com/map.htm).
